@@ -1,0 +1,26 @@
+# BACKEND
+FROM golang:1.25-alpine
+
+WORKDIR /usr/src/app
+COPY code/example-backend .
+
+RUN go build
+
+# Verify installation
+RUN go version \
+&& go test ./...
+
+# Create the appuser
+RUN adduser -D appuser
+# Change the owner of current dir to appuser
+RUN chown appuser .
+# Change the user
+USER appuser
+
+# The allowed port from which the backend receives requests from
+ENV REQUEST_ORIGIN=http://localhost:5001
+
+EXPOSE 8080
+
+CMD ["./server"]
+
