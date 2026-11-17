@@ -1,0 +1,26 @@
+# FRONTEND
+FROM node:16-alpine
+
+WORKDIR /usr/src/app
+COPY code/example-frontend .
+
+# The environment variable for the frontend is allowed to send requests to
+ENV REACT_APP_BACKEND_URL=http://localhost:8080
+
+# Install serve package to serve the project in a specific port
+RUN npm install -g serve \
+# Install npm package(s), it depends on the package.json file in the source files so the copy has to come first.
+&& npm install \
+&& npm run build \
+# Clean-up
+&& npm cache clean --force \
+&& rm -rf node_modules \
+# Adding and assigning user
+&& adduser -D appuser && chown -R appuser .
+
+USER appuser
+
+EXPOSE 5001
+
+CMD ["serve", "-s", "-l", "5001", "build"]
+
