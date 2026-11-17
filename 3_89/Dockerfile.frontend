@@ -1,0 +1,22 @@
+# FRONTEND
+FROM node:16-alpine AS builder
+
+WORKDIR /usr/src/app
+COPY code/example-frontend .
+# The environment variable the frontend is allowed to send requests to.
+ENV REACT_APP_BACKEND_URL=http://localhost:8080
+RUN npm install && npm run build
+
+##
+FROM node:16-alpine
+
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/build ./build
+RUN npm install -g serve \
+&& npm cache clean --force \
+&& adduser -D appuser \
+&& chown -R appuser .
+USER appuser
+EXPOSE 5001
+CMD ["serve", "-s", "-l", "5001", "build"]
+
